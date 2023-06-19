@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Link Shortener</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			padding: 20px;
+			background-color: #f0f0f0;
+		}
+
+		h1 {
+			text-align: center;
+			color: #333;
+		}
+
+		form {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 10px;
+			color: #666;
+		}
+
+		input[type="text"] {
+			width: 300px;
+			padding: 8px;
+			font-size: 14px;
+			background-color: #fff;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+
+		button[type="submit"] {
+			padding: 8px 16px;
+			font-size: 14px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-weight: bold;
+		}
+
+		#shortUrl {
+			margin-top: 20px;
+			text-align: center;
+			font-size: 16px;
+			font-weight: bold;
+		}
+
+		#shortUrl-text {
+			display: inline-block;
+			margin-right: 5px;
+			color: black;
+		}
+
+		#shortUrl-link {
+			display: inline-block;
+			padding: 8px 16px;
+			font-size: 14px;
+			font-weight: bold;
+			color: white;
+			background-color: #45a049;
+			text-decoration: none;
+			border-radius: 4px;
+			transition: background-color 0.3s;
+		}
+
+		#shortUrl-link:hover {
+			background-color: #60bd68;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Link Shortener</h1>
+	<form method="post" action="/shorten">
+		<label for="url">Enter your URL here, Please! :</label>
+		<input type="text" id="url" name="url" required>
+		<button type="submit">Shorten</button>
+	</form>
+	<div id="shortUrl"></div>
+	<script>
+		const form = document.querySelector('form');
+		const shortUrlDiv = document.querySelector('#shortUrl');
+
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			let url = form.url.value;
+
+			if (!/^https?:\/\//i.test(url)) {
+				url = `https://${url}`;
+			}
+
+			const response = await fetch('/shorten', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({url}),
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				const shortUrl = data.shortUrl;
+
+				const textElement = document.createElement('span');
+				textElement.id = 'shortUrl-text';
+				textElement.textContent = "Here's your short URL: ";
+
+				const linkElement = document.createElement('a');
+				linkElement.id = 'shortUrl-link';
+				linkElement.href = shortUrl;
+				linkElement.textContent = shortUrl;
+
+				shortUrlDiv.innerHTML = '';
+				shortUrlDiv.appendChild(textElement);
+				shortUrlDiv.appendChild(document.createTextNode(' '));
+				shortUrlDiv.appendChild(linkElement);
+			} else {
+				shortUrlDiv.textContent = 'Error occurred while shortening URL.';
+			}
+
+		});
+	</script>
+</body>
+
+</html>
